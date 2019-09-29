@@ -17,8 +17,8 @@ These are compulsory command line arguments.
 
 - orderofagent2 = Theory of mind order of agent2
 
-- simulation = 0 if you don't want to see UI simulation(Both agents will compete for 100 rounds in this case)
-               1 if you want to see UI simulation(Both agents will compete for 1 round in this case)
+- simulation = - 0 if you don't want to see UI simulation(Both agents will compete for 100 rounds in this case)
+               - 1 if you want to see UI simulation(Both agents will compete for 1 round in this case)
 
 
 
