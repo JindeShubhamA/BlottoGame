@@ -9,15 +9,15 @@ This folder contains the necessary steps required to run the logic as well as si
 
 These are compulsory command line arguments.
 
-### Troops = Number of troops
+- Troops = Number of troops
 
-### Battlefield = Number of battlefields
+- Battlefield = Number of battlefields
 
-### orderofagent1 = Theory of mind order of the agent1  (Order of agent1 should be higher than agent2 for this experiment)
+- orderofagent1 = Theory of mind order of the agent1  (Order of agent1 should be higher than agent2 for this experiment)
 
-## #orderofagent2 = Theory of mind order of agent2
+- orderofagent2 = Theory of mind order of agent2
 
-### simulation = 0 if you don't want to see UI simulation(Both agents will compete for 100 rounds in this case)
+- simulation = 0 if you don't want to see UI simulation(Both agents will compete for 100 rounds in this case)
 
              1 if you want to see UI simulation(Both agents will compete for 1 round in this case)
 
