@@ -1,8 +1,9 @@
 # Blotto Game
 This folder contains the necessary steps required to run the logic as well as simulation
 
-#Running without frontend simulation
-
+## Running without frontend simulation
+### The simulation will run for 100 rounds 
+   
 1. To run the code without UI simulation
    Default command
    python main.py --troops 8 --battlefields 3 --orderofagent1 3 --orderofagent2 1  --simulation 0
