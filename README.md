@@ -1,7 +1,7 @@
 # Blotto Game
 This folder contains the necessary steps required to run the logic as well as simulation
 
-## Running without frontend simulation
+## Running without frontend 
 ### The simulation will run for 100 rounds 
    
 1. To run the code without UI simulation
@@ -20,6 +20,14 @@ These are compulsory command line arguments.
 
 - simulation =  0 if you don't want to see UI simulation.
                 1 if you want to see UI simulation
-
+                
+ ## Running with frontend    
+ ### The simulation will run for 1 round 
+ #### Requirements linux 64 bit system
+ #### Steps
+ 1. Go to Blotto-game-frontend folder.
+ 2. Copy the contents from executables folder. 
+ 3. Unzip the contents and keep it in Blotto Game directory 
+ 4. run in the terminal command 'sh run.sh' 
 
 
