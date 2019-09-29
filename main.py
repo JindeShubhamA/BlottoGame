@@ -7,7 +7,7 @@ import numpy as np
 #TODO
 '''
 Some of the Global Variables might be required to read it from the config file or get it from the frontEnd.
-HardCoding the global Variables for now 
+Global Variables are read from command line 
 '''
 game="BlottoGame"
 implementation = "1v1"
@@ -25,6 +25,7 @@ def initializeDistributionOfTroops(noOfBattleFields):
     count = 1
     while(count <= noOfBattleFields):
         distribution.append({"battleField":count,"troops":-1})
+        count = count + 1
     return distribution
 
 #Read Config Parameters from config File
@@ -91,17 +92,23 @@ def findProbableDistribution(distributionOfOpponent,numberOfTroops,memory,noOfBa
     Experimental. Battles to be won, tells for a battlefields minimum number of battles to be won. 
     And the battleFields to be won are chosen randomly from the given battlefields 
     '''
-    battleFieldsToBeWon = math.ceil((noOfBattleFields + 1)/2)
+    if(noOfBattleFields%2 == 0):
+        battleFieldsToBeWon = (noOfBattleFields/2) + 1
+    else:
+        battleFieldsToBeWon = (noOfBattleFields+1)/2
     choicesForBattleField=random.sample(range(0, noOfBattleFields), battleFieldsToBeWon)
     distribution = initializeDistributionOfTroops(noOfBattleFields)
     for i in choicesForBattleField:
         if ((numberOfTroopsRemaining - distributionOfOpponent[i]['troops']) < 1):
+
             break
         else:
+
            distribution[i]['battleField'] = distributionOfOpponent[i]['battleField']
            distribution[i]['troops']  = distributionOfOpponent[i]['troops'] + 1
            numberOfTroopsRemaining = numberOfTroopsRemaining - (distributionOfOpponent[i]['troops'] + 1)
     for i in range(0,noOfBattleFields):
+
         if(distribution[i]['troops'] == -1):
             '''
             This logic makes little sense as I am just distributing the remaining troops to a battlefield that has no troops.
@@ -109,6 +116,7 @@ def findProbableDistribution(distributionOfOpponent,numberOfTroops,memory,noOfBa
             '''
             distribution[i]['troops'] = numberOfTroopsRemaining
             numberOfTroopsRemaining = 0
+
     return distribution
 
 #Returns Json of the distribution that will beat the distrubution send via argument
@@ -130,13 +138,15 @@ def findDistributionToBeatDesc(sortedDistributionOfTheOpponent, numberOfTroops):
     return sorted(distribution, key=lambda i: i['battleField'])
 
 #Will return the troops dostribution for higher order agent
-def distributeTroopsForHigherOrderAgent(distributionOfTheOpponent, distributionOfTheUser, orderOfTheAgent, numberOfTroops):
+def distributeTroopsForHigherOrderAgent(distributionOfTheOpponent, distributionOfTheUser, orderOfTheAgent, numberOfTroops,noOfBattleFields):
     jsonForDistribution = []
     #distributionReturn = getJsonForDistribution(distributionOfTheUser)
     jsonDistributionForOpponent = distributionOfTheOpponent
     while(orderOfTheAgent > 0):
          sortedDistributionForOpponent=sorted(jsonDistributionForOpponent, key=lambda i: i['troops'])
-         distributionReturn = findDistributionToBeatAsc(sortedDistributionForOpponent, numberOfTroops)
+
+         distributionReturn = findProbableDistribution(sortedDistributionForOpponent, numberOfTroops,1,noOfBattleFields)
+
          jsonDistributionForOpponent = distributionReturn
          orderOfTheAgent = orderOfTheAgent - 1
     return distributionReturn
@@ -201,41 +211,65 @@ if __name__ == "__main__" :
     parser.add_argument("--orderofagent1",help="Theory of mind order of the agent1")
     parser.add_argument("--orderofagent2",help="Theory of mind order of the agent2")
     parser.add_argument("--simulation",help="1 to unable simulation, 0 to disable simulation")
+    #parser.add_argument("--strategy",help="0 for most optimal strategy, 1 for random winning strategy")
     args = parser.parse_args()
+    simulation_round = 0
     print (args)
     noOfTroops = int(args.troops)
     noOfBattleFields = int(args.battlefields)
     memory = int(args.memory)
     agent1_order = int(args.orderofagent1)
     agent2_order = int(args.orderofagent2)
+    simulation = int(args.simulation)
+    #strategy = int(args.strategy)
+    if(simulation):
+        simulation_round = 1
+    else:
+        simulation_round = 100
+
     agent1=distributeTroopsRandomly(noOfTroops,noOfBattleFields)
     agent2=distributeTroopsRandomly(noOfTroops,noOfBattleFields)
-    print("Troops Distribution for Agent 1\n",agent1)
-    print("Troops Distribution for Agent 2\n",agent2)
-    winner, val = getWinner(agent1,agent2)
-    print("Winner of the battle is \n",winner)
-    print("Troops remaining for A are \n",val)
-    #print getJsonForDistribution(agentA)
-    agent2_higherOrder = distributeTroopsForHigherOrderAgent(agent1, agent2, agent2_order, noOfTroops)
-    agent1_higherOrder = distributeTroopsForHigherOrderAgent(agent1, agent2, agent1_order, noOfTroops)
-    print ("Distribution for agent1 \n",agent1_higherOrder)
-    print ("Distribution for agent2 \n",agent2_higherOrder)
-    winner,afterBattleDistribution = getWinner(agent1_higherOrder,agent2_higherOrder)
-    print("Winner of battle is after redistribution ",winner)
-    if(winner):
-        maxWins = "Agent1"
-    else:
-        maxWins = "Agent2"
-    #print("After Battle Distribution",afterBattleDistribution[0]['battleField'])
-    msgJson = getJsonToSend(game,implementation,noOfTroops,noOfBattleFields,totalPlayers,maxWins,agent1_higherOrder,agent2_higherOrder,afterBattleDistribution)
-    print("Msg Json",msgJson)
-    '''
-    zmq sending msg to the frontend
-    '''
-    '''
-    context = zmq.Context()
-    #  Socket to talk to server
-    socket = context.socket(zmq.REQ)
-    socket.bind("tcp://:5555")
-    socket.send_json(msgJson)
-    '''
+    agent1_wins = 0
+    agent2_wins = 0
+    while(simulation_round > 0):
+         print("Troops Distribution for Agent 1\n",agent1)
+         print("Troops Distribution for Agent 2\n",agent2)
+         winner, val = getWinner(agent1,agent2)
+         print("Winner of the battle is \n",winner)
+         print("Troops remaining for A are \n",val)
+         #print getJsonForDistribution(agentA)
+         agent2_higherOrder = distributeTroopsForHigherOrderAgent(agent1, agent2, agent2_order, noOfTroops,noOfBattleFields)
+         agent1_higherOrder = distributeTroopsForHigherOrderAgent(agent1, agent2, agent1_order, noOfTroops,noOfBattleFields)
+         print ("Distribution for agent1 \n",agent1_higherOrder)
+         print ("Distribution for agent2 \n",agent2_higherOrder)
+         winner,afterBattleDistribution = getWinner(agent1_higherOrder,agent2_higherOrder)
+         print("Winner of battle is after redistribution ",winner)
+         if(winner):
+             maxWins = "Agent1"
+             agent1_wins = agent1_wins + 1
+         else:
+             maxWins = "Agent2"
+             agent2_wins = agent2_wins + 1
+
+         if ((simulation_round%10) == 0):
+             strng_to_prnt = "Wins after " + str(100 - simulation_round) + " rounds are: "
+             print(strng_to_prnt)
+             print("Agent1 \n",agent1_wins)
+             print("Agent2 \n",agent2_wins)
+
+         simulation_round = simulation_round - 1
+         agent1 = agent1_higherOrder
+         agent2 = agent2_higherOrder
+    print("Agent wins are ",agent1_wins,agent2_wins)
+    if(simulation):
+        msgJson = getJsonToSend(game,implementation,noOfTroops,noOfBattleFields,totalPlayers,maxWins,agent1_higherOrder,agent2_higherOrder,afterBattleDistribution)
+        print("Msg Json",msgJson)
+        '''
+        zmq sending msg to the frontend
+        '''
+
+        context = zmq.Context()
+        #  Socket to talk to server
+        socket = context.socket(zmq.REP)
+        socket.bind("tcp://*:5555")
+        socket.send_json(msgJson)
