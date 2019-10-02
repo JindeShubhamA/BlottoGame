@@ -193,6 +193,9 @@ def getJsonToSend(game,implementation,noOfTroops,noOfBattleFields,totalPlayers,m
         if(afterBattleDistribution[i]["troopsDifference"]>0):
             winner = "Agent1"
             troops_remaining = afterBattleDistribution[i]["troopsDifference"]
+        elif(afterBattleDistribution[i]["troopsDifference"]==0):
+            winner = "Draw"
+            troops_remaining = 0
         else:
             winner = "Agent2"
             troops_remaining = -1*afterBattleDistribution[i]["troopsDifference"]
@@ -207,7 +210,6 @@ if __name__ == "__main__" :
     #Command line arguments
     parser.add_argument("--troops",help="number of troops")
     parser.add_argument("--battlefields",help="number of battlefields")
-    parser.add_argument("--memory",help="memoryofagent")
     parser.add_argument("--orderofagent1",help="Theory of mind order of the agent1")
     parser.add_argument("--orderofagent2",help="Theory of mind order of the agent2")
     parser.add_argument("--simulation",help="1 to unable simulation, 0 to disable simulation")
@@ -217,7 +219,7 @@ if __name__ == "__main__" :
     print (args)
     noOfTroops = int(args.troops)
     noOfBattleFields = int(args.battlefields)
-    memory = int(args.memory)
+
     agent1_order = int(args.orderofagent1)
     agent2_order = int(args.orderofagent2)
     simulation = int(args.simulation)
@@ -244,13 +246,14 @@ if __name__ == "__main__" :
          print ("Distribution for agent2 \n",agent2_higherOrder)
          winner,afterBattleDistribution = getWinner(agent1_higherOrder,agent2_higherOrder)
          print("Winner of battle is after redistribution ",winner)
-         if(winner):
+         if(winner == 1):
              maxWins = "Agent1"
              agent1_wins = agent1_wins + 1
-         else:
+         elif(winner == -1):
              maxWins = "Agent2"
              agent2_wins = agent2_wins + 1
-
+         else:
+             maxWins = "Draw"
          if ((simulation_round%10) == 0):
              strng_to_prnt = "Wins after " + str(100 - simulation_round) + " rounds are: "
              print(strng_to_prnt)
